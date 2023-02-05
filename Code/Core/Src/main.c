@@ -64,6 +64,15 @@ PortPin L[4] =
 };
 
 uint16_t ButtonMatrix = 0;
+uint16_t num = 0;
+uint16_t num_regis = 0;
+
+struct ButtonState{
+	uint16_t Current;
+	uint16_t Last;
+};
+
+struct ButtonState ButtonMatrixState;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -124,7 +133,40 @@ int main(void)
 	  if(HAL_GetTick()>=timestamp){
 		  timestamp = HAL_GetTick() + 10;
 		  ReadMatrixButton_1Row();
+		  if(ButtonMatrix == 0b000000000001){
+			  num = 7;
+		  }else if(ButtonMatrix == 0b000000000010){
+			  num = 4;
+		  }else if(ButtonMatrix == 0b000000000100){
+			  num = 1;
+		  }else if(ButtonMatrix == 0b000000001000){
+			  num = 0;
+		  }else if(ButtonMatrix == 0b000000010000){
+			  num = 8;
+		  }else if(ButtonMatrix == 0b000000100000){
+			  num = 5;
+		  }else if(ButtonMatrix == 0b000001000000){
+			  num = 2;
+		  }else if(ButtonMatrix == 0b000100000000){
+			  num = 9;
+		  }else if(ButtonMatrix == 0b001000000000){
+			  num = 6;
+		  }else if(ButtonMatrix == 0b010000000000){
+			  num = 3;
+		  }else{
+			  num = 100; //0 1
+		  }
+
 	  }
+	  ButtonMatrixState.Current = num;
+
+	  if(ButtonMatrixState.Last == 100 && ButtonMatrixState.Current != 100 ){
+		  num_regis = num;
+	  }
+
+	  ButtonMatrixState.Last = ButtonMatrixState.Current;
+
+
   }
   /* USER CODE END 3 */
 }
