@@ -42,15 +42,37 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+typedef struct _PortPin
+{
+	GPIO_TypeDef* PORT;
+	uint16_t PIN;
+}PortPin;
 
+PortPin R[4] =
+{
+		{ GPIOA, GPIO_PIN_10 },
+		{ GPIOB, GPIO_PIN_3 } ,
+		{ GPIOB, GPIO_PIN_5 } ,
+		{ GPIOB, GPIO_PIN_4 }
+};
+
+PortPin L[4] =
+{ 		{ GPIOA, GPIO_PIN_9 },
+		{ GPIOC, GPIO_PIN_7 },
+		{ GPIOB, GPIO_PIN_6 },
+		{ GPIOA, GPIO_PIN_7 }
+};
+
+uint16_t ButtonMatrix = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-/* USER CODE BEGIN PFP */
 
+/* USER CODE BEGIN PFP */
+void ReadMatrixButton_1Row();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -98,6 +120,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  static uint32_t timestamp = 0;
+	  if(HAL_GetTick()>=timestamp){
+		  timestamp = HAL_GetTick() + 10;
+		  ReadMatrixButton_1Row();
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -246,7 +273,21 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void ReadMatrixButton_1Row() {
+    static uint8_t X = 0;
+    register int i;
+    for (i = 0; i < 4; i++) {
+        if (HAL_GPIO_ReadPin(L[i].PORT, L[i].PIN)) {
+            ButtonMatrix &= ~(1 << (X * 4 + i));
+        } else {
+            ButtonMatrix |= 1 << (X * 4 + i);
+        }
+    }
+    HAL_GPIO_WritePin(R[X].PORT, R[X].PIN, 1);
+    HAL_GPIO_WritePin(R[(X + 1) % 4].PORT, R[(X + 1) % 4].PIN, 0);
+    X++;
+    X %= 4;
+}
 /* USER CODE END 4 */
 
 /**
