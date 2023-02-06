@@ -64,8 +64,8 @@ PortPin L[4] =
 };
 
 uint16_t ButtonMatrix = 0;
-uint16_t num = 0;
-uint16_t num_regis = 0;
+uint16_t num = 100;
+uint16_t num_regis = 100;
 
 struct ButtonState{
 	uint16_t Current;
@@ -165,6 +165,7 @@ int main(void)
 	  }
 
 	  ButtonMatrixState.Last = ButtonMatrixState.Current;
+
 
 
   }
