@@ -73,6 +73,7 @@ struct ButtonState{
 };
 
 struct ButtonState ButtonMatrixState;
+int State = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -135,28 +136,31 @@ int main(void)
 		  ReadMatrixButton_1Row();
 		  if(ButtonMatrix == 0b000000000001){
 			  num = 7;
-		  }else if(ButtonMatrix == 0b000000000010){
+		  }else if(ButtonMatrix == 0b0000000000000010){
 			  num = 4;
-		  }else if(ButtonMatrix == 0b000000000100){
+		  }else if(ButtonMatrix == 0b0000000000000100){
 			  num = 1;
-		  }else if(ButtonMatrix == 0b000000001000){
+		  }else if(ButtonMatrix == 0b0000000000001000){
 			  num = 0;
-		  }else if(ButtonMatrix == 0b000000010000){
+		  }else if(ButtonMatrix == 0b0000000000010000){
 			  num = 8;
-		  }else if(ButtonMatrix == 0b000000100000){
+		  }else if(ButtonMatrix == 0b0000000000100000){
 			  num = 5;
-		  }else if(ButtonMatrix == 0b000001000000){
+		  }else if(ButtonMatrix == 0b0000000001000000){
 			  num = 2;
-		  }else if(ButtonMatrix == 0b000100000000){
+		  }else if(ButtonMatrix == 0b0000000100000000){
 			  num = 9;
-		  }else if(ButtonMatrix == 0b001000000000){
+		  }else if(ButtonMatrix == 0b0000001000000000){
 			  num = 6;
-		  }else if(ButtonMatrix == 0b010000000000){
+		  }else if(ButtonMatrix == 0b0000010000000000){
 			  num = 3;
+		  }else if(ButtonMatrix == 0b0001000000000000){
+			  num = 10; //Clear
+		  }else if(ButtonMatrix == 0b1000000000000000){
+			  num = 11; //OK
 		  }else{
 			  num = 100; //0 1
 		  }
-
 	  }
 	  ButtonMatrixState.Current = num;
 
@@ -166,7 +170,75 @@ int main(void)
 
 	  ButtonMatrixState.Last = ButtonMatrixState.Current;
 
+	  if(num_regis != 100){ // INIT -> 6 -> 4 -> 3 -> 4 -> 0 -> 5 -> 0 -> 0 -> 0 -> 4 -> 1 -> OK *Clear*
+		  switch (State) {
+			case 0:
+			default:
+				if(num_regis == 6){State=1;}//INIT
+				else if(num_regis  != 6){State=13;}
+				break;
 
+			case 1:
+				if(num_regis  == 4){State=2;}//6
+				else if(num_regis  != 4){State=13;}
+				break;
+
+			case 2:
+				if(num_regis  == 3){State=3;}//64
+				else if(num_regis  != 3){State=13;}
+				break;
+
+			case 3:
+				if(num_regis  == 4){State=4;}//643
+				else if(num_regis  != 4){State=13;}
+				break;
+
+			case 4:
+				if(num_regis  == 0){State=5;}//6434
+				else if(num_regis  != 0){State=13;}
+				break;
+
+			case 5:
+				if(num_regis  == 5){State=6;}//64340
+				else if(num_regis  != 5){State=13;}
+				break;
+
+			case 6:
+				if(num_regis  == 0){State=7;}//643405
+				else if(num_regis  != 0){State=13;}
+				break;
+
+			case 7:
+				if(num_regis  == 0){State=8;}//6434050
+				else if(num_regis  != 0){State=13;}
+				break;
+
+			case 8:
+				if(num_regis  == 0){State=9;}//64340500
+				else if(num_regis  != 0){State=13;}
+				break;
+
+			case 9:
+				if(num_regis  == 4){State=10;}//643405000
+				else if(num_regis  != 4){State=13;}
+				break;
+
+			case 10:
+				if(num_regis  == 1){State=11;}//6434050004
+				else if(num_regis  != 1){State=13;}
+				break;
+
+			case 11:
+				if(num_regis  == 11){HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5,GPIO_PIN_SET);State=13;}//64340500041 if OK
+				else if(num_regis  != 11){State=13;}
+				break;
+
+			case 13: //wait clear
+				if(num_regis==10){HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5,GPIO_PIN_RESET);State=0;}
+				break;
+		}
+		 num_regis = 100; //num regis clear
+	  }
 
   }
   /* USER CODE END 3 */
